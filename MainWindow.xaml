@@ -1,0 +1,90 @@
+﻿<Window x:Class="GameLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GameLauncher"
+        mc:Ignorable="d"
+        Title="MainWindow" Background="#3b3b3b"
+        Height="600" Width="800" MinHeight="600" MinWidth="800"
+        ResizeMode="CanResize" WindowState="Maximized"
+        Loaded="Window_Loaded">
+    <StackPanel>
+        <StackPanel.Resources>
+            <Style TargetType="{x:Type Border}">
+                <Setter Property="Margin" Value="15, 0, 0, 0">
+
+                </Setter>
+            </Style>
+        </StackPanel.Resources>
+
+        <TextBlock Text="Available games"
+                 Foreground="white"
+                 FontSize="28"
+                 HorizontalAlignment="Center"
+                 Margin="20,0,0,20"/>
+        <StackPanel Orientation="Horizontal">
+            <Border Width="150"
+                    Height="180"
+                    CornerRadius="10"
+                    Background="#632680">
+                <StackPanel>
+                    <Image Height="100">
+                      
+                    </Image>
+                  <TextBlock Text="GameName"
+                             Foreground="white"
+                             FontSize="20"
+                             HorizontalAlignment="Center"/>
+                    <Button Width="100"
+                            Content="Download">
+                        <Button.Resources>
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="CornerRadius" Value="5"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <Border Width="150"
+                  Height="180"
+                  CornerRadius="10"
+                  Background="#632680"></Border>
+
+            <Border Width="150"
+                  Height="180"
+                  CornerRadius="10"
+                  Background="#632680"></Border>
+        </StackPanel>
+        <TextBlock Text="Installed games"
+                   Foreground="white"
+                   FontSize="28"
+                   HorizontalAlignment="Center"
+                   Margin="20,0,0,20"/>
+        <StackPanel Orientation="Horizontal">
+            <Border Width="150"
+                    Height="180"
+                    CornerRadius="10"
+                    Background="Green"></Border>
+
+            <Border Width="150"
+                    Height="180"
+                    CornerRadius="10"
+                    Background="Green"></Border>
+
+            <Border Width="150"
+                    Height="180"
+                    CornerRadius="10"
+                    Background="Green"></Border>
+        </StackPanel>
+    </StackPanel>
+
+<!-- Grid Background="#632680"> 
+      <StackPanel>
+            <TextBlock Text="Available games"
+                       Foreground="White"></TextBlock>
+        </StackPanel>
+  </>
+    -->
+</Window>
