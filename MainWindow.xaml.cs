@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Net;
+using GameLauncher.ViewModels;
 
 namespace GameLauncher
 {
@@ -26,6 +27,7 @@ namespace GameLauncher
     {
         public MainWindow()
         {
+            this.DataContext = new ViewModels.GameLauncher();
             InitializeComponent();
         }
 

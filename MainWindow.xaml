@@ -23,22 +23,40 @@
                  FontSize="28"
                  HorizontalAlignment="Center"
                  Margin="20,0,0,20"/>
-        <StackPanel Orientation="Horizontal">
-            <Border Width="150"
-                    Height="180"
-                    CornerRadius="10"
-                    Background="#632680">
+        <!--Binding to the list of Game objects-->
+        <ListView Background="Transparent"
+                  BorderThickness="0"
+                  ItemsSource="{Binding AvailableGames}">
+          <ListView.ItemContainerStyle>
+            <Style TargetType="ListViewItem">
+              <Setter Property="Focusable" Value="false"/>
+              <Setter Property="Background" Value="Transparent" />
+            </Style>
+          </ListView.ItemContainerStyle>
+            <ListView.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal"/>
+              </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                  <Border Width="230"
+                          Height="310"
+                          CornerRadius="10"
+                          Background="#632680">
                 <StackPanel>
-                    <Image Height="100">
-                      
+                    <Image Height="200">
+                      <!-- Here will be the game logo or smth-->
                     </Image>
-                  <TextBlock Text="GameName"
+                  <TextBlock Text="{Binding GameName}"
                              Foreground="white"
                              FontSize="20"
                              HorizontalAlignment="Center"/>
-                    <Button Width="100"
-                            Content="Download">
-                        <Button.Resources>
+                            <Button Width="100"
+                                    VerticalAlignment="Bottom"
+                                    Content="Download"
+                            Command = "{Binding ClickCommand}">
+                                <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="5"/>
                             </Style>
@@ -46,17 +64,11 @@
                     </Button>
                 </StackPanel>
             </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
 
-            <Border Width="150"
-                  Height="180"
-                  CornerRadius="10"
-                  Background="#632680"></Border>
-
-            <Border Width="150"
-                  Height="180"
-                  CornerRadius="10"
-                  Background="#632680"></Border>
-        </StackPanel>
+        </ListView>
+        <!--
         <TextBlock Text="Installed games"
                    Foreground="white"
                    FontSize="28"
@@ -78,6 +90,7 @@
                     CornerRadius="10"
                     Background="Green"></Border>
         </StackPanel>
+        -->
     </StackPanel>
 
 <!-- Grid Background="#632680"> 
