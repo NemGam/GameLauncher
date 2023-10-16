@@ -34,9 +34,6 @@ namespace GameLauncher
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("Loaded");
-
-            
-            //https://github.com/NemGam/Pong/releases/download/v1.1.0/Pong.zip
         }
     }
 }
