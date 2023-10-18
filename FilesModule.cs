@@ -18,10 +18,12 @@ namespace GameLauncher
             if (LauncherPath == null) throw new Exception("FilesModule was not initialized!");
 
             DirectoryInfo di = new($"{LauncherPath}/Games");
-
+            Dictionary<string, string> versions = GetVersionData();
             //Check what games are installed
+            //TODO:Handle games that are not from database
             return di.GetDirectories()
-                .ToDictionary(x => x.Name, x => new Game(x.Name, x.FullName, Game.State.Installed));
+                .ToDictionary(x => x.Name, 
+                x => new Game(x.Name, x.FullName, versions == null? "0.0.0" : versions[x.Name], Game.State.Installed));
         }
 
         /// <summary>
@@ -41,6 +43,11 @@ namespace GameLauncher
                 di.CreateSubdirectory($"./Games");
             }
             return 0;
+        }
+
+        private static void UpdateVersionFile(Game game)
+        {
+
         }
 
         public static Dictionary<string, string>? GetVersionData()
@@ -67,9 +74,11 @@ namespace GameLauncher
 
         }
 
-        public static async void InstallGame(Stream stream, string gameName)
+        public static async void InstallGame(Stream stream, Game game)
         {
-            FileStream finalFileStream = new FileStream($"{LauncherPath}/Games/{gameName}.zip", FileMode.Create);
+            FileStream finalFileStream = new FileStream($"{LauncherPath}/Games/{game.GameName}.zip", FileMode.Create);
+            //TODO:Unpack
+
             await stream.CopyToAsync(finalFileStream);
         }
     }

@@ -19,7 +19,7 @@ public class Game
     readonly string? URL;
 
     [BsonElement("Version")]
-    readonly string version;
+    public readonly string version;
 
     public enum State
     {
@@ -47,13 +47,13 @@ public class Game
     /// <param name="gameName">Name of the game. Must be Unique</param>
     /// <param name="localFolder">Where the installed game is located.</param>
     /// <param name="state">State of the game, usually Ready.</param>
-    public Game(string gameName, string localFolder, State state = State.Installed, string Version = "")
+    public Game(string gameName, string localFolder, string version, State state = State.Installed)
 	{
         this.GameName = gameName;
         this.localFolder = localFolder;
         this.CurrentState = state;
         this.isInstalled = true;
-        this.version = Version;
+        this.version = version;
     }
 
     public override string ToString()
@@ -82,7 +82,7 @@ public class Game
         switch (CurrentState)
         {
             case State.NotInstalled:
-                NetworkModule.DownloadGame(this.GameName);
+                NetworkModule.DownloadGame(this);
                 CurrentState = State.Installing;
                 break;
             case State.Installing:

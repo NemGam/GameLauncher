@@ -18,7 +18,7 @@ namespace GameLauncher
         private static HttpClient? httpClient;
         private static MongoClient? dbClient;
 
-        //Might wanna move out from the open source, however has only permission to read one and only collection
+        //Should move out from the open source, however has only permission to read one and only collection
         //so not that scary
         private const string dbUsername = "readeronly";
         private const string dbPassword = "testtest";
@@ -109,11 +109,11 @@ namespace GameLauncher
         //Download latest release of the project.
         //Requires the gameName to match the project and the zip names!
 
-        public static async void DownloadGame(string gameName)
+        public static async void DownloadGame(Game game)
         {
             if (httpClient == null) { throw new Exception("No HttpClient Available"); };
-            var stream = await httpClient.GetStreamAsync($"https://github.com/NemGam/{gameName}/releases/latest/download/{gameName}.zip");
-            FilesModule.InstallGame(stream, gameName);
+            var stream = await httpClient.GetStreamAsync($"https://github.com/NemGam/{game.GameName}/releases/latest/download/{game.GameName}.zip");
+            FilesModule.InstallGame(stream, game);
         }
     }
 }

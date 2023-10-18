@@ -52,17 +52,33 @@ namespace GameLauncher.ViewModels
             {
                 return DownloadableGames.Values.ToList();
             }
-            return InstalledGames.Values.ToList();
 
             List<Game> games = new();
-            foreach (KeyValuePair<string, Game> game in InstalledGames) 
-            { 
-                if (DownloadableGames.ContainsKey(game.Key)){
-                    //if version in DB != local version then
+
+            foreach (KeyValuePair<string, Game> game in DownloadableGames)
+            {
+                if (InstalledGames.ContainsKey(game.Key))
+                {
+                    //if version in db != local version -> set ready to update
+                    if (InstalledGames[game.Key].version != DownloadableGames[game.Key].version)
                         InstalledGames[game.Key].SetUpdateAvailable();
+                    games.Add(InstalledGames[game.Key]);
+                }
+                else
+                {
+                    games.Add(game.Value);
                 }
             }
+
+            //That should never add any new games, but useful for testing
+            foreach (KeyValuePair<string, Game> game in InstalledGames)
+            {
+                if (DownloadableGames.ContainsKey(game.Key)) continue;
+                else games.Add(game.Value);
+            }
+            return games;
         }
+
         private void Initialize()
         {
             FilesModule.Initilize();
