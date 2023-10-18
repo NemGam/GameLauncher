@@ -25,7 +25,8 @@ public class Game
     {
         NotInstalled,
         Installing,
-        Ready,
+        CanBeUpdated,
+        Installed,
         Running
     }
 
@@ -43,10 +44,10 @@ public class Game
     /// <summary>
     /// This constructor creates a Game object that references an installed game.
     /// </summary>
-    /// <param name="gameName"></param>
-    /// <param name="localFolder"></param>
-    /// <param name="state"></param>
-    public Game(string gameName, string localFolder, State state = State.Ready, string Version = "")
+    /// <param name="gameName">Name of the game. Must be Unique</param>
+    /// <param name="localFolder">Where the installed game is located.</param>
+    /// <param name="state">State of the game, usually Ready.</param>
+    public Game(string gameName, string localFolder, State state = State.Installed, string Version = "")
 	{
         this.GameName = gameName;
         this.localFolder = localFolder;
@@ -71,6 +72,11 @@ public class Game
         }
     }
 
+    public void SetUpdateAvailable()
+    {
+        CurrentState = State.CanBeUpdated;
+    }
+
     public void ButtonPress()
     {
         switch (CurrentState)
@@ -82,7 +88,10 @@ public class Game
             case State.Installing:
                 //Prevent from pressing the button
                 break;
-            case State.Ready:
+            case State.CanBeUpdated: 
+                //Update the game
+                break;
+            case State.Installed:
                 //Launch
                 break;
             case State.Running:

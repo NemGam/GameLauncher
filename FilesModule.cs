@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -12,19 +13,15 @@ namespace GameLauncher
         //Path to the "Launcher" folder
         public static string? LauncherPath { get; private set; }
 
-        internal static List<string> GetInstalledGamesList() 
+        internal static Dictionary<string, Game> GetInstalledGamesList() 
         {
             if (LauncherPath == null) throw new Exception("FilesModule was not initialized!");
 
-            var list = new List<string>();
             DirectoryInfo di = new($"{LauncherPath}/Games");
 
             //Check what games are installed
-            foreach (var game in di.GetDirectories())
-            {
-                list.Add(game.Name);
-            }
-            return list;
+            return di.GetDirectories()
+                .ToDictionary(x => x.Name, x => new Game(x.Name, x.FullName, Game.State.Installed));
         }
 
         /// <summary>

@@ -9,6 +9,7 @@ using MongoDB.Driver;
 using System.Windows;
 using System.Diagnostics;
 using MongoDB.Bson.Serialization;
+using System.Runtime.CompilerServices;
 
 namespace GameLauncher
 {
@@ -19,8 +20,10 @@ namespace GameLauncher
 
         //Might wanna move out from the open source, however has only permission to read one and only collection
         //so not that scary
-        const string dbUsername = "readeronly";
-        const string dbPassword = "testtest";
+        private const string dbUsername = "readeronly";
+        private const string dbPassword = "testtest";
+
+        private static bool isInitialized;
         public static int Initialize() 
         {
 
@@ -40,54 +43,65 @@ namespace GameLauncher
                 throw new Exception("Failed to create a MongoClient.");
             }
 
-            GetAvailableGamesList();
 
 
 
-            if (CheckForLauncherUpdates())
+            if (CheckForLauncherUpdates().Result)
             {
                 UpdateLauncher();
             }
             
-            
+            isInitialized = true;
 
             return 0;
         }
 
-        private async static void GetAvailableGamesList()
+        public async static Task<Dictionary<string, Game>?> GetAvailableGamesList()
         {
+            if (!isInitialized) throw new Exception("Network Module has not been initialized yet!");
             var db = dbClient!.GetDatabase("GamesList");
+
+            Debug.WriteLine("Network Module: Getting collection");
             var colls = db.GetCollection<Game>("Games");
+
+            Debug.WriteLine("Network Module: got collection");
 
             try
             {
+                Debug.WriteLine("Network Module: getting data from collections");
                 //Fetching available games from the database
-                var availableGames = await colls.Find(Builders<Game>.Filter.Empty)
+                var gameList = await colls.Find(Builders<Game>.Filter.Empty)
                     .Project(Builders<Game>.Projection.Exclude("_id"))
                     .As<Game>()
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
+                Debug.WriteLine("Network Module: got data from collections");
+
+                Dictionary<string, Game> availableGames = gameList.ToDictionary(x => x.GameName, x => x);
 
                 Debug.WriteLine($"The list of games on the server is:");
                 foreach (var game in availableGames)
                 {
-                    Debug.WriteLine($"info: {game}");
+                    Debug.WriteLine($"info: {game.Key}");
                 }
+                return availableGames;
+
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "ERROR");
+                return null;
             }
         }
 
         //TODO:Should be async method to self update
-        private static void UpdateLauncher()
+        private async static void UpdateLauncher()
         {
             throw new NotImplementedException();
         }
 
-        private static bool CheckForLauncherUpdates()
+        private async static Task<bool> CheckForLauncherUpdates()
         {
-            //TODO: Self update from github 
+            //TODO: Self update from github, MUST BLOCK GAMES CHECK TO PREVENT ISSUES
             return false;
         }
 
