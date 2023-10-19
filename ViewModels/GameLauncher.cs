@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -83,6 +84,23 @@ namespace GameLauncher.ViewModels
         {
             FilesModule.Initilize();
             NetworkModule.Initialize();
+        }
+
+        public void LaunchGame(Game game)
+        {
+            var process = new Process();
+            process.StartInfo = new ProcessStartInfo(
+                $"{FilesModule.LauncherPath}/Games/{game.GameName}/{game.GameName}.exe");
+
+            //Here are 2 lines that you need
+            process.EnableRaisingEvents = true;
+            //Just used LINQ for short, usually would use method as event handler
+            process.Exited += (s, a) =>
+            {
+                process.Exited -= (s, a) => { };
+                Debug.WriteLine("EXITED");
+            };
+            process.Start();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

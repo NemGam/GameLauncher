@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using System.IO.Compression;
 
 namespace GameLauncher
 {
@@ -13,7 +15,7 @@ namespace GameLauncher
         //Path to the "Launcher" folder
         public static string? LauncherPath { get; private set; }
 
-        internal static Dictionary<string, Game> GetInstalledGamesList() 
+        internal static Dictionary<string, Game> GetInstalledGamesList()
         {
             if (LauncherPath == null) throw new Exception("FilesModule was not initialized!");
 
@@ -22,8 +24,8 @@ namespace GameLauncher
             //Check what games are installed
             //TODO:Handle games that are not from database
             return di.GetDirectories()
-                .ToDictionary(x => x.Name, 
-                x => new Game(x.Name, x.FullName, versions == null? "0.0.0" : versions[x.Name], Game.State.Installed));
+                .ToDictionary(x => x.Name,
+                x => new Game(x.Name, x.FullName, versions == null ? "0.0.0" : versions[x.Name], Game.State.Installed));
         }
 
         /// <summary>
@@ -45,9 +47,33 @@ namespace GameLauncher
             return 0;
         }
 
-        private static void UpdateVersionFile(Game game)
+        private static void UpdateVersionFile(Game game, bool shouldDelete = false)
         {
+            string dataPath = $"{LauncherPath}/Data/data.json";
+            var newFile = GetVersionData();
+            newFile ??= new Dictionary<string, string>();
 
+            if (shouldDelete)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                if (!newFile.ContainsKey(game.GameName))
+                {
+                    newFile.Add(game.GameName, game.version);
+                }
+                else
+                {
+                    newFile[game.GameName] = game.version;
+                }
+                
+            }
+            //Check if the version file already contains this game.
+            //Update the file if so. Add the new property to the file otherwise.
+            
+            string json = System.Text.Json.JsonSerializer.Serialize(newFile);
+            File.WriteAllText(dataPath, json);
         }
 
         public static Dictionary<string, string>? GetVersionData()
@@ -65,21 +91,22 @@ namespace GameLauncher
             string json = File.ReadAllText(dataPath);
             Dictionary<string, string>? result = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
             return result; 
-
-
-            //Serialize data TODO: Move to the NetworkModule
-            //string json = System.Text.Json.JsonSerializer.Serialize(values);
-            //File.WriteAllText(dataPath, json);
-
-
         }
 
-        public static async void InstallGame(Stream stream, Game game)
+        public static async Task<int> InstallGameAsync(Stream stream, Game game)
         {
-            FileStream finalFileStream = new FileStream($"{LauncherPath}/Games/{game.GameName}.zip", FileMode.Create);
-            //TODO:Unpack
-
-            await stream.CopyToAsync(finalFileStream);
+            string tempPath = $"{Path.GetTempPath()}/{game.GameName}.zip";
+            using (FileStream finalFileStream = new FileStream(tempPath, FileMode.Create))
+            {
+                UpdateVersionFile(game);
+                //Extract the game from the zip
+                await stream.CopyToAsync(finalFileStream);
+                
+            }
+            ZipFile.ExtractToDirectory(tempPath, $"{LauncherPath}/Games/{game.GameName}", true);
+            File.Delete(tempPath);
+            //On success return 0
+            return 0;
         }
     }
 }

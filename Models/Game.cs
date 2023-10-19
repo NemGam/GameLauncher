@@ -2,25 +2,28 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 
 namespace GameLauncher;
 [BsonIgnoreExtraElements]
-public class Game
+public class Game : INotifyPropertyChanged
 {
 
     [BsonElement("GameName")]
     public string GameName { get;}
-    private bool isInstalled;
-    readonly string? localFolder;
+    private readonly string? localFolder;
 
     [BsonElement("URL")]
-    readonly string? URL;
+    public string? URL { get; }
 
     [BsonElement("Version")]
     public readonly string version;
 
+    public string DownloadButtonString { get; private set; }
     public enum State
     {
         NotInstalled,
@@ -30,15 +33,25 @@ public class Game
         Running
     }
 
-    public State CurrentState { get; private set; }
+    private State _currentState;
 
+    public State CurrentState
+    {
+        get { return _currentState; }
+        private set
+        {
+            _currentState = value;
+            DownloadButtonString = GetNewDownloadButtonText(value);
+            RaisePropertyChanged(nameof(DownloadButtonString));
+        }
+    }
     [BsonConstructor]
     public Game(string GameName, string URL, string version)
     {
         this.GameName = GameName;
         this.URL = URL;
         this.version = version;
-        this.isInstalled = false;
+        CurrentState = State.NotInstalled;
     }
 
     /// <summary>
@@ -52,8 +65,7 @@ public class Game
         this.GameName = gameName;
         this.localFolder = localFolder;
         this.CurrentState = state;
-        this.isInstalled = true;
-        this.version = version;
+        this.version = version; 
     }
 
     public override string ToString()
@@ -77,13 +89,27 @@ public class Game
         CurrentState = State.CanBeUpdated;
     }
 
-    public void ButtonPress()
+    private static string GetNewDownloadButtonText(State newState)
+    {
+        return (newState) switch
+        {
+            State.NotInstalled => "Download",
+            State.Installing => "Downloading",
+            State.CanBeUpdated => "Update",
+            State.Installed => "Play",
+            State.Running => "Playing",
+            _ => "ERROR"
+        };
+    }
+
+    public async void ButtonPress()
     {
         switch (CurrentState)
         {
             case State.NotInstalled:
-                NetworkModule.DownloadGame(this);
                 CurrentState = State.Installing;
+                await NetworkModule.DownloadGame(this);
+                CurrentState = State.Installed;
                 break;
             case State.Installing:
                 //Prevent from pressing the button
@@ -92,6 +118,7 @@ public class Game
                 //Update the game
                 break;
             case State.Installed:
+                
                 //Launch
                 break;
             case State.Running:
@@ -99,5 +126,12 @@ public class Game
                 break;
         }
         MessageBox.Show(ToString());
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected void RaisePropertyChanged([CallerMemberName] string propertyName = "")
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

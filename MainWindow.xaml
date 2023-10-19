@@ -54,8 +54,8 @@
                              HorizontalAlignment="Center"/>
                             <Button Width="100"
                                     VerticalAlignment="Bottom"
-                                    Content="Download"
-                            Command = "{Binding ClickCommand}">
+                                    Content="{Binding DownloadButtonString}"
+                            Command = "{Binding DataContext.ClickCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                                 <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="5"/>

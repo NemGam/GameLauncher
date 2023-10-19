@@ -46,10 +46,10 @@ namespace GameLauncher
 
 
 
-            if (CheckForLauncherUpdates().Result)
-            {
-                UpdateLauncher();
-            }
+            //if (CheckForLauncherUpdates().Result)
+            //{
+            //   UpdateLauncher();
+            //}
             
             isInitialized = true;
 
@@ -93,6 +93,7 @@ namespace GameLauncher
             }
         }
 
+        /*
         //TODO:Should be async method to self update
         private async static void UpdateLauncher()
         {
@@ -104,16 +105,20 @@ namespace GameLauncher
             //TODO: Self update from github, MUST BLOCK GAMES CHECK TO PREVENT ISSUES
             return false;
         }
-
+        */
         //https://github.com/USER/PROJECT/releases/latest/download/PACKAGE_NAME
         //Download latest release of the project.
         //Requires the gameName to match the project and the zip names!
 
-        public static async void DownloadGame(Game game)
+        public static async Task<int> DownloadGame(Game game)
         {
             if (httpClient == null) { throw new Exception("No HttpClient Available"); };
-            var stream = await httpClient.GetStreamAsync($"https://github.com/NemGam/{game.GameName}/releases/latest/download/{game.GameName}.zip");
-            FilesModule.InstallGame(stream, game);
+            //var stream = await httpClient.GetStreamAsync($"https://github.com/NemGam/{game.GameName}/releases/latest/download/{game.GameName}.zip");
+            using (System.IO.Stream stream = await httpClient.GetStreamAsync(game.URL))
+            {
+                return await FilesModule.InstallGameAsync(stream, game);
+            }
+            
         }
     }
 }
