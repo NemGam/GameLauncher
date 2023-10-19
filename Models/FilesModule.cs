@@ -7,8 +7,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.IO.Compression;
+using GameLauncher.ViewModels;
 
-namespace GameLauncher
+namespace GameLauncher.Models
 {
     internal static class FilesModule
     {
@@ -67,12 +68,12 @@ namespace GameLauncher
                 {
                     newFile[game.GameName] = game.version;
                 }
-                
+
             }
             //Check if the version file already contains this game.
             //Update the file if so. Add the new property to the file otherwise.
-            
-            string json = System.Text.Json.JsonSerializer.Serialize(newFile);
+
+            string json = JsonSerializer.Serialize(newFile);
             File.WriteAllText(dataPath, json);
         }
 
@@ -80,7 +81,7 @@ namespace GameLauncher
         {
             //TODO:Handle errors
             string dataPath = $"{LauncherPath}/Data/data.json";
-            
+
             if (!File.Exists(dataPath))
             {
                 File.Create(dataPath);
@@ -90,7 +91,7 @@ namespace GameLauncher
             //Deserialize data
             string json = File.ReadAllText(dataPath);
             Dictionary<string, string>? result = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-            return result; 
+            return result;
         }
 
         public static async Task<int> InstallGameAsync(Stream stream, Game game)
@@ -101,7 +102,7 @@ namespace GameLauncher
                 UpdateVersionFile(game);
                 //Extract the game from the zip
                 await stream.CopyToAsync(finalFileStream);
-                
+
             }
             ZipFile.ExtractToDirectory(tempPath, $"{LauncherPath}/Games/{game.GameName}", true);
             File.Delete(tempPath);

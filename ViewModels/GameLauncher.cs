@@ -13,20 +13,22 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Shapes;
+using GameLauncher.Models;
+using static GameLauncher.ViewModels.Game;
 
 namespace GameLauncher.ViewModels
 {
     public class GameLauncher : INotifyPropertyChanged
     {
-        public ObservableCollection<Game> AvailableGames { get; set; }
-        private Dictionary<string, Game>? InstalledGames;
-        private Dictionary<string, Game>? DownloadableGames;
-        //public ObservableCollection<Game> InstalledGames { get; set; }
+        public ObservableCollection<Game> AvailableGames { get; set; } //Collection of all available games
+        private Dictionary<string, Game>? InstalledGames; //Collection of all installed games
+        private Dictionary<string, Game>? DownloadableGames; //Collection of all downloadable games(in database)
+
 
 
         public GameLauncher()
         {
-            this.Initialize();
+            Initialize();
             Debug.WriteLine("Initialized");
             AvailableGames = new ObservableCollection<Game>(GetGames().Result);
             Debug.WriteLine("Got all the games");
@@ -48,7 +50,7 @@ namespace GameLauncher.ViewModels
             if (DownloadableGames is null)
             {
                 return InstalledGames.Values.ToList();
-            } 
+            }
             else if (InstalledGames is null)
             {
                 return DownloadableGames.Values.ToList();
@@ -58,12 +60,12 @@ namespace GameLauncher.ViewModels
 
             foreach (KeyValuePair<string, Game> game in DownloadableGames)
             {
-                if (InstalledGames.ContainsKey(game.Key))
+                if (InstalledGames.TryGetValue(game.Key, out Game value))
                 {
                     //if version in db != local version -> set ready to update
                     if (InstalledGames[game.Key].version != DownloadableGames[game.Key].version)
                         InstalledGames[game.Key].SetUpdateAvailable();
-                    games.Add(InstalledGames[game.Key]);
+                    games.Add(value);
                 }
                 else
                 {
@@ -71,7 +73,7 @@ namespace GameLauncher.ViewModels
                 }
             }
 
-            //That should never add any new games, but useful for testing
+            //That should never add any new games, but useful for testing and some exceptions
             foreach (KeyValuePair<string, Game> game in InstalledGames)
             {
                 if (DownloadableGames.ContainsKey(game.Key)) continue;
@@ -86,22 +88,27 @@ namespace GameLauncher.ViewModels
             NetworkModule.Initialize();
         }
 
-        public void LaunchGame(Game game)
+        public static void LaunchGame(Game game)
         {
-            var process = new Process();
-            process.StartInfo = new ProcessStartInfo(
-                $"{FilesModule.LauncherPath}/Games/{game.GameName}/{game.GameName}.exe");
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo(
+                $"{FilesModule.LauncherPath}/Games/{game.GameName}/{game.GameName}.exe"),
 
-            //Here are 2 lines that you need
-            process.EnableRaisingEvents = true;
+                //Here are 2 lines that you need
+                EnableRaisingEvents = true
+            };
             //Just used LINQ for short, usually would use method as event handler
             process.Exited += (s, a) =>
             {
                 process.Exited -= (s, a) => { };
+                game.OnFinishedExecution();
                 Debug.WriteLine("EXITED");
             };
             process.Start();
         }
+
+
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

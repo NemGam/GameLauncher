@@ -1,4 +1,4 @@
-﻿using GameLauncher.ViewModels;
+﻿using GameLauncher.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
@@ -8,13 +8,13 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 
-namespace GameLauncher;
+namespace GameLauncher.ViewModels;
 [BsonIgnoreExtraElements]
 public class Game : INotifyPropertyChanged
 {
 
     [BsonElement("GameName")]
-    public string GameName { get;}
+    public string GameName { get; }
     private readonly string? localFolder;
 
     [BsonElement("URL")]
@@ -61,27 +61,16 @@ public class Game : INotifyPropertyChanged
     /// <param name="localFolder">Where the installed game is located.</param>
     /// <param name="state">State of the game, usually Ready.</param>
     public Game(string gameName, string localFolder, string version, State state = State.Installed)
-	{
-        this.GameName = gameName;
+    {
+        GameName = gameName;
         this.localFolder = localFolder;
-        this.CurrentState = state;
-        this.version = version; 
+        CurrentState = state;
+        this.version = version;
     }
 
     public override string ToString()
     {
-        return $"This is {this.GameName}, located in {this.localFolder}, version is: {this.version}";
-    }
-
-    private ICommand? _clickCommand;
-    public ICommand ClickCommand => _clickCommand ??= new CommandHandler(() => ButtonPress(), () => CanExecute);
-    public bool CanExecute
-    {
-        get
-        {
-            // check if execution is allowed, i.e., validate, check if a process is running, etc. 
-            return CurrentState != State.Installing;
-        }
+        return $"This is {GameName}, located in {localFolder}, version is: {version}";
     }
 
     public void SetUpdateAvailable()
@@ -89,9 +78,21 @@ public class Game : INotifyPropertyChanged
         CurrentState = State.CanBeUpdated;
     }
 
-    private static string GetNewDownloadButtonText(State newState)
+
+    public void OnFinishedExecution()
     {
-        return (newState) switch
+        this.CurrentState = State.Installed;
+        Debug.WriteLine("I've FINISHED");
+    }
+
+    /// <summary>
+    /// Get new text for the game button based on the current state of the game.
+    /// </summary>
+    /// <param name="newState">Current state</param>
+    /// <returns></returns>
+    private static string GetNewDownloadButtonText(State state)
+    {
+        return state switch
         {
             State.NotInstalled => "Download",
             State.Installing => "Downloading",
@@ -114,18 +115,29 @@ public class Game : INotifyPropertyChanged
             case State.Installing:
                 //Prevent from pressing the button
                 break;
-            case State.CanBeUpdated: 
+            case State.CanBeUpdated:
                 //Update the game
                 break;
             case State.Installed:
-                
+                GameLauncher.LaunchGame(this);
+                CurrentState = State.Running;
                 //Launch
                 break;
             case State.Running:
                 //Stop the execution
                 break;
         }
-        MessageBox.Show(ToString());
+    }
+
+    private ICommand? _clickCommand;
+    public ICommand ClickCommand => _clickCommand ??= new CommandHandler(() => ButtonPress(), () => CanExecute);
+    public bool CanExecute
+    {
+        get
+        {
+            // check if execution is allowed, i.e., validate, check if a process is running, etc. 
+            return CurrentState != State.Installing;
+        }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

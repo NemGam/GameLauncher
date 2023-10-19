@@ -10,8 +10,9 @@ using System.Windows;
 using System.Diagnostics;
 using MongoDB.Bson.Serialization;
 using System.Runtime.CompilerServices;
+using GameLauncher.ViewModels;
 
-namespace GameLauncher
+namespace GameLauncher.Models
 {
     internal class NetworkModule
     {
@@ -24,7 +25,7 @@ namespace GameLauncher
         private const string dbPassword = "testtest";
 
         private static bool isInitialized;
-        public static int Initialize() 
+        public static int Initialize()
         {
 
 
@@ -36,7 +37,7 @@ namespace GameLauncher
             }
 
             dbClient = new MongoClient($"mongodb+srv://{dbUsername}:{dbPassword}@gamestorage.fwevppr.mongodb.net");
-            
+
             if (dbClient == null)
             {
                 MessageBox.Show("Failed to create a database client.", "ERROR");
@@ -50,7 +51,7 @@ namespace GameLauncher
             //{
             //   UpdateLauncher();
             //}
-            
+
             isInitialized = true;
 
             return 0;
@@ -118,7 +119,7 @@ namespace GameLauncher
             {
                 return await FilesModule.InstallGameAsync(stream, game);
             }
-            
+
         }
     }
 }
