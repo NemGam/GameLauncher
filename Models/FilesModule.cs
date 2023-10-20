@@ -104,7 +104,10 @@ namespace GameLauncher.Models
                 await stream.CopyToAsync(finalFileStream);
 
             }
-            ZipFile.ExtractToDirectory(tempPath, $"{LauncherPath}/Games", true);
+            string destPath = Directory.Exists($"{LauncherPath}/Games/{game.GameName})") ?
+                $"{LauncherPath}/Games" : $"{LauncherPath}/Games/{game.GameName}";
+
+            ZipFile.ExtractToDirectory(tempPath, destPath, true);
             File.Delete(tempPath);
             //On success return 0
             return 0;
