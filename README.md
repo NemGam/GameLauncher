@@ -1,5 +1,13 @@
 # GameLauncher
-Game Launcher to simplify the access to the games on my github
+This is the Game Launcher to simplify the access to the games on my github!
+Made with C#, WPF, .Net and MongoDB
 
-!!IT IS WORK IN PROGRESS!!
-There is no usable version yet
+Current features:
+- Download the games w/o the need to find the repository.
+- Update games when the new version is available! No need to check the github for games updates.
+
+Planned features:
+- Game deletion
+- Game icons
+- Better layout
+- Better error handling
