@@ -97,7 +97,7 @@ namespace GameLauncher.Models
         public static async Task<int> InstallGameAsync(Stream stream, Game game)
         {
             string tempPath = $"{Path.GetTempPath()}/{game.GameName}.zip";
-            using (FileStream finalFileStream = new FileStream(tempPath, FileMode.Create))
+            using (FileStream finalFileStream = new(tempPath, FileMode.Create))
             {
                 UpdateVersionFile(game);
                 //Extract the game from the zip

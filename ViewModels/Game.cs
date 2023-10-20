@@ -18,10 +18,10 @@ public class Game : INotifyPropertyChanged
     private readonly string? localFolder;
 
     [BsonElement("URL")]
-    public string? URL { get; }
+    public string? URL { private set; get; }
 
     [BsonElement("Version")]
-    public readonly string version;
+    public string version { private set; get; }
 
     public string DownloadButtonString { get; private set; }
     public enum State
@@ -73,16 +73,17 @@ public class Game : INotifyPropertyChanged
         return $"This is {GameName}, located in {localFolder}, version is: {version}";
     }
 
-    public void SetUpdateAvailable()
+    public void SetUpdateAvailable(string URL, string newVersion)
     {
         CurrentState = State.CanBeUpdated;
+        this.URL = URL;
+        this.version = newVersion;
     }
 
 
     public void OnFinishedExecution()
     {
         this.CurrentState = State.Installed;
-        Debug.WriteLine("I've FINISHED");
     }
 
     /// <summary>
@@ -114,14 +115,18 @@ public class Game : INotifyPropertyChanged
                 break;
             case State.Installing:
                 //Prevent from pressing the button
+                //TODO: some kind of loading slider
                 break;
             case State.CanBeUpdated:
-                //Update the game
+                //TODO:Make it update only parts of the game
+                CurrentState = State.Installing;
+                await NetworkModule.DownloadGame(this);
+                CurrentState = State.Installed;
                 break;
             case State.Installed:
+                //Launch
                 GameLauncher.LaunchGame(this);
                 CurrentState = State.Running;
-                //Launch
                 break;
             case State.Running:
                 //Stop the execution

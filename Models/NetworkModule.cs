@@ -75,6 +75,7 @@ namespace GameLauncher.Models
                     .Project(Builders<Game>.Projection.Exclude("_id"))
                     .As<Game>()
                     .ToListAsync().ConfigureAwait(false);
+
                 Debug.WriteLine("Network Module: got data from collections");
 
                 Dictionary<string, Game> availableGames = gameList.ToDictionary(x => x.GameName, x => x);
@@ -107,19 +108,39 @@ namespace GameLauncher.Models
             return false;
         }
         */
-        //https://github.com/USER/PROJECT/releases/latest/download/PACKAGE_NAME
-        //Download latest release of the project.
-        //Requires the gameName to match the project and the zip names!
 
+
+        //TODO:Separate Download and Install
+        /// <summary>
+        /// Download the game.
+        /// </summary>
+        /// <param name="game">Game to download</param>
+        /// <returns>Returns 0 on success</returns>
+        /// <exception cref="Exception"></exception>
         public static async Task<int> DownloadGame(Game game)
         {
+            if (!isInitialized) throw new Exception("Network Module has not been initialized yet!");
             if (httpClient == null) { throw new Exception("No HttpClient Available"); };
             //var stream = await httpClient.GetStreamAsync($"https://github.com/NemGam/{game.GameName}/releases/latest/download/{game.GameName}.zip");
-            using (System.IO.Stream stream = await httpClient.GetStreamAsync(game.URL))
+            System.IO.Stream? stream = null;
+            int result = -1;
+            try
             {
-                return await FilesModule.InstallGameAsync(stream, game);
+                stream = await httpClient.GetStreamAsync(game.URL);
             }
-
+            catch(HttpRequestException ex)
+            {
+                MessageBox.Show(ex.Message, "ERROR");
+            }
+            finally
+            {
+                if (stream != null)
+                {
+                    result = await FilesModule.InstallGameAsync(stream, game);
+                    stream.Dispose(); 
+                }
+            }
+            return result;
         }
     }
 }

@@ -64,7 +64,7 @@ namespace GameLauncher.ViewModels
                 {
                     //if version in db != local version -> set ready to update
                     if (InstalledGames[game.Key].version != DownloadableGames[game.Key].version)
-                        InstalledGames[game.Key].SetUpdateAvailable();
+                        InstalledGames[game.Key].SetUpdateAvailable(game.Value.URL, game.Value.version);
                     games.Add(value);
                 }
                 else
@@ -95,12 +95,13 @@ namespace GameLauncher.ViewModels
                 StartInfo = new ProcessStartInfo(
                 $"{FilesModule.LauncherPath}/Games/{game.GameName}/{game.GameName}.exe"),
 
-                //Here are 2 lines that you need
                 EnableRaisingEvents = true
             };
-            //Just used LINQ for short, usually would use method as event handler
+
+            
             process.Exited += (s, a) =>
             {
+                
                 process.Exited -= (s, a) => { };
                 game.OnFinishedExecution();
                 Debug.WriteLine("EXITED");
