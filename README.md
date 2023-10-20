@@ -11,3 +11,4 @@ Planned features:
 - Game icons
 - Better layout
 - Better error handling
+- Launcher's self update
