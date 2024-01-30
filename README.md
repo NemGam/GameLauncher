@@ -1,4 +1,8 @@
 # GameLauncher
+
+#CURRENTLY UNDER A COMPLETE REWORK
+I've learned a lot of valuable experience that I have to apply here! Stay tuned!
+
 This is the Game Launcher to simplify the access to the games on my github!
 Made with C#, WPF, .Net and MongoDB
 
